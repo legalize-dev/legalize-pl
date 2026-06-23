@@ -1,112 +1,44 @@
-# Legalize PL
+# legalize-pl
 
-### Polskie akty prawne w formacie Markdown, wersjonowane w Git.
+Polska — ustawodawstwo w formacie Markdown, wersjonowane jako repozytorium git.
 
-Każdy akt prawny to plik. Każda reforma to commit.
+Każda ustawa to plik; każda nowelizacja to commit z datą rzeczywistej, oficjalnej publikacji. `git log` dowolnej ustawy pokazuje jej pełną historię — kiedy została uchwalona, które artykuły uległy zmianie i na mocy której normy.
 
-**~34 100 aktów prawnych Dziennika Ustaw** · Dane otwarte z [api.sejm.gov.pl/eli](https://api.sejm.gov.pl/eli)
+Repozytorium obejmuje akty prawne publikowane w Dzienniku Ustaw (wydawca DU) udostępniane przez ELI API Sejmu. Zakres wersji 1: wyłącznie akty z dostępną treścią HTML, od roku 2000 wzwyż (pokrycie HTML jest niemal pełne od ~2012 r.). Każdy plik odpowiada jednemu aktowi, każda reforma to commit git datowany na oficjalną datę ogłoszenia.
 
-Część projektu [Legalize](https://github.com/legalize-dev/legalize) · [legalize.dev/pl](https://legalize.dev/pl)
+## Co zawiera
 
-> **Wczesny etap** — To repozytorium jest w fazie aktywnego rozwoju. Struktura plików, historia commitów i treść mogą ulec istotnym zmianom, włącznie z pełną regeneracją.
+- **Ustawa** (`DU-RRRR-PPP.md`) — `pl/DU-2024-1907.md`, `pl/DU-2023-1963.md`
+- **Rozporządzenie** (`DU-RRRR-PPP.md`) — `pl/DU-2024-1984.md`, `pl/DU-2024-1977.md`
+- **Konstytucja** (`DU-RRRR-PPP.md`) — Konstytucja Rzeczypospolitej Polskiej (dostępna w ISAP głównie jako PDF — może nie występować w wersji v1).
+- **Obwieszczenie** (`DU-RRRR-PPP.md`) — Obwieszczenia (m.in. teksty jednolite) publikowane w Dzienniku Ustaw.
+- **Uchwała** (`DU-RRRR-PPP.md`)
+- **Umowa międzynarodowa** (`DU-RRRR-PPP.md`) — Umowy i protokoły międzynarodowe ogłaszane w Dzienniku Ustaw.
 
-## Szybki start
+## Źródło danych
 
-```bash
-# Sklonuj polskie akty prawne
-git clone https://github.com/legalize-dev/legalize-pl.git
+- **ISAP — Internetowy System Aktów Prawnych / ELI API Sejmu Rzeczypospolitej Polskiej (Kancelaria Sejmu)**
+  - Portal ISAP: https://isap.sejm.gov.pl/
+  - Portal ELI: https://eli.gov.pl/
+  - API ELI (Sejm): https://api.sejm.gov.pl/eli
+  - Dokumentacja API: https://api.sejm.gov.pl/eli_pl.html
 
-# Wyszukaj w Ustawie o ochronie ludności i obronie cywilnej
-grep -A 3 "Art. 1" pl/DU-2024-1907.md
+## Ograniczenia zakresu
 
-# Historia konkretnego aktu
-git log --oneline -- pl/DU-2024-1907.md
+- Uwzględniany jest wyłącznie wydawca **DU (Dziennik Ustaw)**; Monitor Polski (MP) i inne dzienniki urzędowe nie są obecnie pobierane.
+- Pomijane są akty dostępne **tylko w formacie PDF** (np. Konstytucja z 1997 r., obwieszczenia z tekstami jednolitymi kodeksów, większość aktów sprzed 2012 r.), ponieważ pipeline przetwarza treść z HTML.
+- **Obrazy są pomijane** — pipeline nie obsługuje jeszcze zasobów binarnych.
+- Identyfikator pliku pochodzi z ELI: `{wydawca}-{rok}-{pozycja}` (forma ELI `DU/rok/pozycja` zapisana z myślnikami, bezpieczna dla systemu plików).
 
-# Tekst jednolity Kodeksu karnego (Obwieszczenie Marszałka Sejmu)
-cat pl/DU-2024-17.md
-```
+## Inne kraje
 
-## Struktura
+To repozytorium jest częścią projektu **Legalize**, który utrzymuje ustawodawstwo wielu krajów w postaci repozytoriów git. Pełny katalog dostępny jest pod adresem https://legalize.dev.
 
-```
-pl/
-  DU-2024-1907.md    — Ustawa o ochronie ludności i obronie cywilnej
-  DU-2024-1976.md    — Ustawa o wypowiedzeniu Porozumienia...
-  DU-2024-17.md      — Obwieszczenie ws. tekstu jednolitego Kodeksu karnego
-  DU-2024-706.md     — Obwieszczenie ws. tekstu jednolitego Kodeksu karnego wykonawczego
-  ...                — ~34 100 aktów prawnych Dziennika Ustaw
-```
+## Wsparcie
 
-Rodzaj aktu (ustawa, rozporządzenie, obwieszczenie, uchwała, …) jest podany w nagłówku YAML każdego pliku, a nie w strukturze katalogów.
-
-## Format
-
-Każdy plik zawiera:
-
-- **Nagłówek YAML** — tytuł, identyfikator ELI, adres Dziennika Ustaw, data ogłoszenia, data wejścia w życie, status, organ wydający, słowa kluczowe, odniesienia do dyrektyw UE itd.
-- **Treść w Markdown** — artykuły, paragrafy, punkty i litery z oryginalnym numerowaniem. Tabele renderowane jako tabele Markdown pipe. Cytowane fragmenty (teksty zmieniane) jako blockquote.
-
-Przykład:
-
-```markdown
----
-title: "Ustawa z dnia 5 grudnia 2024 r. o ochronie ludności i obronie cywilnej"
-identifier: "DU-2024-1907"
-country: "pl"
-rank: "ustawa"
-publication_date: "2024-12-05"
-status: "in_force"
-source: "https://api.sejm.gov.pl/eli/acts/DU/2024/1907"
-display_address: "Dz.U. 2024 poz. 1907"
-keywords: "obrona cywilna, ochrona ludności, …"
----
-# Ustawa z dnia 5 grudnia 2024 r. o ochronie ludności i obronie cywilnej
-
-### Rozdział 1. Przepisy ogólne
-
-##### Art. 1.
-
-Ustawa określa:
-
-  1) zadania ochrony ludności i obrony cywilnej;
-  2) organy i podmioty realizujące zadania ochrony ludności i obrony cywilnej;
-  …
-```
-
-## Zakres
-
-**Wersja 1:**
-
-- Publikator: **Dziennik Ustaw (DU)** — powszechnie obowiązujące akty prawne (art. 87 Konstytucji).
-- Akty z tekstem HTML dostępnym w API ELI Sejmu (praktycznie wszystko od ~2012 plus wybrane wcześniejsze, w tym **teksty jednolite kodeksów** publikowane przez Marszałka Sejmu).
-- Łącznie ~34 100 aktów od 2000 roku.
-- Obejmuje skonsolidowane teksty m.in. **Kodeksu karnego**, **Kodeksu postępowania cywilnego**, **Kodeksu spółek handlowych**, **Kodeksu karnego wykonawczego** w wersjach Obwieszczeń Marszałka Sejmu z dostępnym HTML.
-
-**Obecnie poza zakresem (planowane na v2):**
-
-- **Konstytucja z 1997 r.** — API udostępnia ją wyłącznie jako PDF.
-- **Niektóre starsze teksty jednolite kodeksów** publikowane wyłącznie jako PDF.
-- **Monitor Polski (MP)** — uchwały, zarządzenia i inne akty nie będące powszechnie obowiązującym prawem.
-- Poszczególne akty historyczne sprzed 2000 r.
-
-## Źródło
-
-Dane pochodzą z oficjalnego API ELI (European Legislation Identifier) Kancelarii Sejmu:
-
-```
-https://api.sejm.gov.pl/eli
-```
-
-API jest publiczne, nie wymaga uwierzytelnienia i udostępnia zarówno metadane w formacie JSON jak i skonsolidowany tekst HTML każdego aktu.
-
-Polskie publikacje prawne są w domenie publicznej zgodnie z art. 4 ustawy z dnia 4 lutego 1994 r. o prawie autorskim i prawach pokrewnych (Dz.U. 1994 nr 24 poz. 83).
+Legalize jest darmowy i otwarty. Jeśli ta praca jest dla Ciebie przydatna, możesz pomóc w utrzymaniu hostingu i dalszym rozwoju: [Wesprzyj ten projekt](https://buymeacoffee.com/legalizedev).
 
 ## Licencja
 
-[MIT License](LICENSE) — treść aktów prawnych jest w domenie publicznej; licencja obejmuje format repozytorium (skrypty, struktura, metadane).
-
-## Zobacz też
-
-- [legalize.dev](https://legalize.dev) — przeglądarka internetowa wszystkich krajów objętych projektem Legalize
-- [legalize-pipeline](https://github.com/legalize-dev/legalize-pipeline) — silnik generujący to repozytorium
-- [api.sejm.gov.pl/eli](https://api.sejm.gov.pl/eli/openapi/) — dokumentacja API źródłowego
+- **Kod pipeline'u**: MIT (https://github.com/legalize-dev/legalize-pipeline)
+- **Dane**: domena publiczna (urzędowe publikacje rządowe)
